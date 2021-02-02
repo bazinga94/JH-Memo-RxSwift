@@ -2,6 +2,17 @@
 #
 # gitignore contributors: remember to update Global/Xcode.gitignore, Objective-C.gitignore & Swift.gitignore
 
+# General
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# CocoaPods
+Pods/
+Podfile.lock
+# Add this line if you want to avoid checking in source code from the Xcode workspace
+*.xcworkspace
+
 ## User settings
 xcuserdata/
 
