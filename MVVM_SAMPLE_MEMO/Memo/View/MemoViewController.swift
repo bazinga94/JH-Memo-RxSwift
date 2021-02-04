@@ -6,10 +6,13 @@
 //
 
 import UIKit
+import RxSwift
+import RxCocoa
 
 class MemoViewController: UIViewController {
 	@IBOutlet weak var memoTextView: UITextView!
 
+	var disposeBag = DisposeBag()
 	var viewModel: MemoViewModel? {
 		didSet {
 			viewModel?.memoContentDidChange = { [weak self] viewModel in
@@ -21,12 +24,17 @@ class MemoViewController: UIViewController {
 	override func viewDidLoad() {
 		super.viewDidLoad()
 		viewModel?.refreshMemoView()
+		memoTextView.rx.text
+			.subscribe(onNext: { [weak self] str in
+				self?.viewModel?.memoContentUpdate(content: str ?? "")
+			})
+			.disposed(by: disposeBag)		// UI 스레드 작업이 있다면 bind 메소드를 사용(중요)
 	}
 
 	override func viewWillDisappear(_ animated: Bool) {
 		super.viewWillDisappear(animated)
 		if self.isMovingFromParent, let homeViewController = self.navigationController?.topViewController as? HomeViewController, let viewModel = viewModel {
-			(viewModel.index == -1) ? viewModel.memoContentInsert(content: memoTextView.text) : viewModel.memoContentUpdate(content: memoTextView.text)
+			(viewModel.index == -1) ? viewModel.memoContentInsert(content: memoTextView.text) : print("RxSwift 로 ViewModel 업데이트")//viewModel.memoContentUpdate(content: memoTextView.text)
 			homeViewController.viewModel?.memoListUpdate(memoViewModel: viewModel)
 		}
 	}
