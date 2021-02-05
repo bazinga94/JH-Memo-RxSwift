@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import RxSwift
 
 // YG 참고!
 protocol ViewModel {
@@ -18,47 +19,57 @@ protocol ViewModel {
 
 protocol HomeViewModelProtocol {
 	var title: String! { get }
-	var memoList: [MemoModel]! { get }
+//	var memoList: [MemoModel]! { get }
 	var titleDidChange: ((HomeViewModelProtocol) -> ())? { get set }
-	var memoListDidChange: ((HomeViewModelProtocol) -> ())? { get set }
+//	var memoListDidChange: ((HomeViewModelProtocol) -> ())? { get set }
 	func refresHomeView()
-	func memoDidSelect(for index: Int) -> MemoViewModel
+//	func memoDidSelect(for index: Int) -> MemoViewModel
 }
 
 class HomeViewModel: NSObject, HomeViewModelProtocol {
 	var homeModel: HomeModel!
+	var homeModelObservable: Observable<[MemoModel]>?
 	var titleDidChange: ((HomeViewModelProtocol) -> ())?
-	var memoListDidChange: ((HomeViewModelProtocol) -> ())?
+//	var memoListDidChange: ((HomeViewModelProtocol) -> ())?
 	var title: String! {
 		didSet {
 			self.titleDidChange?(self)
 		}
 	}
-	var memoList: [MemoModel]! {
-		didSet {
-			self.memoListDidChange?(self)
-		}
-	}
+//	var memoList: [MemoModel]! {
+//		didSet {
+//			self.memoListDidChange?(self)
+//		}
+//	}
 
 	override init() {
 		super.init()
 		self.homeModel = HomeModel.init(navigationTitle: "MVVM 메모앱", memoModelList: fetchFromCoreData())
+		self.homeModelObservable = Observable.of(homeModel.memoModelList)
 	}
 
 	func refresHomeView() {
 		title = homeModel.navigationTitle
-		memoList = homeModel.memoModelList
+//		memoList = homeModel.memoModelList
 	}
 
-	func memoDidSelect(for index: Int) -> MemoViewModel {
-		return MemoViewModel(index: index, memoModel: memoList[index])
-	}
+//	func memoDidSelect(for index: Int) -> MemoViewModel {
+//		return MemoViewModel(index: index, memoModel: memoList[index])
+//	}
 
 	func memoListUpdate(memoViewModel: MemoViewModel) {
-		if memoList.count > 0, memoViewModel.index != -1 {
-			memoList.remove(at: memoViewModel.index)
+//		if memoList.count > 0, memoViewModel.index != -1 {
+//			memoList.remove(at: memoViewModel.index)
+//		}
+//		memoList.insert(memoViewModel.memoModel, at: 0)
+		if homeModel.memoModelList.count > 0, memoViewModel.index != -1 {
+			homeModel.memoModelList.remove(at: memoViewModel.index)
 		}
-		memoList.insert(memoViewModel.memoModel, at: 0)
+		homeModel.memoModelList.insert(memoViewModel.memoModel, at: 0)
+		homeModelObservable?.subscribe(onNext: {_ in
+			print("확인")
+		})
+		.disposed(by: DisposeBag())
 	}
 
 	private func fetchFromCoreData() -> [MemoModel] {
@@ -78,16 +89,16 @@ class HomeViewModel: NSObject, HomeViewModelProtocol {
 	}
 }
 
-extension HomeViewModel: UITableViewDataSource {
-	func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-		return memoList.count
-	}
-
-	func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-		let cell: HomeTableViewCell = tableView.dequeueReusableCell(for: indexPath)
-		cell.titleLabel.text = memoList[indexPath.row].homeTitle
-		cell.contentLabel.text = memoList[indexPath.row].homeContent
-		cell.dateLabel.text = memoList[indexPath.row].date.dateToString("yyyy.MM.dd HH:mm:ss")
-		return cell
-	}
-}
+//extension HomeViewModel: UITableViewDataSource {
+//	func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+//		return memoList.count
+//	}
+//
+//	func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+//		let cell: HomeTableViewCell = tableView.dequeueReusableCell(for: indexPath)
+//		cell.titleLabel.text = memoList[indexPath.row].homeTitle
+//		cell.contentLabel.text = memoList[indexPath.row].homeContent
+//		cell.dateLabel.text = memoList[indexPath.row].date.dateToString("yyyy.MM.dd HH:mm:ss")
+//		return cell
+//	}
+//}
