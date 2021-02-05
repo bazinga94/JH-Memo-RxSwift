@@ -35,6 +35,7 @@ class MemoViewModel: MemoViewModelProtocol {
 
 	func memoContentInsert(content: String) {
 		let title = content.split(separator: "\n", maxSplits: 1).map(String.init)
+		if title.count == 0 { return }
 		memoModel.homeTitle = title[0]
 		memoModel.homeContent = (title.count > 1) ? title[1] : "추가 텍스트 없음"
 		memoModel.content = content
@@ -44,11 +45,16 @@ class MemoViewModel: MemoViewModelProtocol {
 
 	func memoContentUpdate(content: String) {
 		let title = content.split(separator: "\n", maxSplits: 1).map(String.init)
+		if title.count == 0 { return }
 		memoModel.homeTitle = title[0]
 		memoModel.homeContent = (title.count > 1) ? title[1] : "추가 텍스트 없음"
 		memoModel.content = content
 		memoModel.date = Date()
 		updateInCoreData(memoModel: memoModel)
+	}
+
+	func memoContentDelete() {
+		deleteCoreData(memoModel: memoModel)
 	}
 
 	private func insertInCoreData(memoModel: MemoModel) {
@@ -62,11 +68,7 @@ class MemoViewModel: MemoViewModelProtocol {
 		content.setValue(memoModel.homeContent, forKey: "homeContent")
 		content.setValue(memoModel.date, forKey: "date")
 
-		do {
-			try context.save()
-		} catch {
-			print(error.localizedDescription)
-		}
+		saveContext(context)
 	}
 
 	private func updateInCoreData(memoModel: MemoModel) {
@@ -83,10 +85,31 @@ class MemoViewModel: MemoViewModelProtocol {
 				results?[0].setValue(memoModel.homeContent, forKey: "homeContent")
 				results?[0].setValue(memoModel.date, forKey: "date")
 			}
+			saveContext(context)
 		} catch {
 			print(error.localizedDescription)
 		}
 
+	}
+
+	private func deleteCoreData(memoModel: MemoModel) {
+		let appDelegate = UIApplication.shared.delegate as! AppDelegate
+		let context = appDelegate.persistentContainer.viewContext
+		let fetchRequest: NSFetchRequest<NSFetchRequestResult> = NSFetchRequest.init(entityName: "MemoEntity")
+		fetchRequest.predicate = NSPredicate(format: "date = %@", memoModel.date as CVarArg)
+
+		do {
+			guard let results = try context.fetch(fetchRequest) as? [MemoEntity] else { return }
+			if results.count != 0 {
+				context.delete(results[0])
+			}
+			saveContext(context)
+		} catch {
+			print(error.localizedDescription)
+		}
+	}
+
+	private func saveContext(_ context: NSManagedObjectContext) {
 		do {
 			try context.save()
 		} catch {
