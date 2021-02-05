@@ -7,6 +7,8 @@
 
 import UIKit
 import CoreData
+import RxSwift
+import RxCocoa
 
 class HomeViewController: UIViewController {
 	@IBOutlet weak var tableView: UITableView!
@@ -29,6 +31,8 @@ class HomeViewController: UIViewController {
 		}
 	}
 
+	private var bag = DisposeBag()
+
 	override func viewDidLoad() {
 		super.viewDidLoad()
 		initUI()
@@ -42,8 +46,10 @@ class HomeViewController: UIViewController {
 
 	private func initAndBindData() {
 		self.viewModel = HomeViewModel.init()
-		tableView.delegate = self
+		tableView.rx.setDelegate(self)
+			.disposed(by: bag) //tableView.delegate = self
 		tableView.dataSource = viewModel
+
 	}
 }
 
