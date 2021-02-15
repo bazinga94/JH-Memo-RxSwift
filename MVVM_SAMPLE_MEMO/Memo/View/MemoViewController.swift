@@ -34,7 +34,7 @@ class MemoViewController: UIViewController {
 	override func viewWillDisappear(_ animated: Bool) {
 		super.viewWillDisappear(animated)
 		if self.isMovingFromParent, let homeViewController = self.navigationController?.topViewController as? HomeViewController, let viewModel = viewModel {
-			(viewModel.index == -1) ? viewModel.memoContentInsert(content: memoTextView.text) : print("RxSwift 로 ViewModel 업데이트")//viewModel.memoContentUpdate(content: memoTextView.text)
+			(viewModel.index == -1) ? viewModel.memoContentInsert(content: memoTextView.text) : print("ViewModel update by RxSwift")//viewModel.memoContentUpdate(content: memoTextView.text)
 			homeViewController.viewModel?.memoListUpdate(memoViewModel: viewModel)
 		}
 	}
