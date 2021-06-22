@@ -1,2 +1,2 @@
 # JH-Memo-RxSwift
-swift, mvvm, clean architecture and RxSwift!
+swift, mvvm and RxSwift!
